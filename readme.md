@@ -1,0 +1,1 @@
+Placeholder for tech articles written and published by Equativ.
