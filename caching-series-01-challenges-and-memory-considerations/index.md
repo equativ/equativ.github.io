@@ -1,12 +1,12 @@
-# Caching Series 01 - Challenges & memory considerations
+# In-memory Caching - Challenges & Memory Considerations
 
 [[_TOC_]]
 
 Equativ is a leading provider of digital advertising solutions, offering a range of products and services to help businesses reach their target audiences and achieve their marketing goals. 
 
-At Equativ, we solve scalability issues with a microservice architecture, but that comes at the cost of increased network I/Os which can impact performance and latency negatively. In this context, caching is critical.
+At Equativ, we solve scalability issues with distributed service-oriented architecture (SOA), but that comes at the cost of increased network I/Os which can impact performance and latency negatively. In this context, caching is critical.
 
-Caching helps to reduce the load on various services of the ad service pipeline since they'll be requested less often and perform fewer computations, which can improve the overall performance of the system.
+Caching helps reduce the load on various services of the ad service pipeline since they'll be requested less often and perform fewer computations, which can improve the system's overall performance.
 
 Caching can also help to reduce the latency, or delay, in the ad delivery process since less I/Os implies less latency in the process of delivering the ad to the user. This not only improves the user experience but makes ad-serving more competitive in a real-time bidding context and means fewer in-flight requests at any given moment on the infrastructure (less pressure).
 
@@ -25,7 +25,7 @@ As caching is a common practice across all digital systems, there is a wide vari
 
 #### Locality of references
 
-It turns out that a lot of research has already been conducted in this field. The term [locality of reference](https://en.wikipedia.org/wiki/Locality_of_reference) has been introduced by Peter J. Denning in 2005 in the paper "The Locality Principle" and is now commonly used in computer science. This Wikipedia article is rather well written and the principle itself is quite general (it's not just about caching) so we won't get into too much detail here, but we can denote a few common cache access patterns from this.
+It turns out that a lot of research has already been conducted in this field. The term [locality [of reference](https://en.wikipedia.org/wiki/Locality_of_reference) was introduced by Peter J. Denning in 2005 in the paper "The Locality Principle" and is now commonly used in computer science. This Wikipedia article is rather well written and the principle itself is quite general (it's not just about caching) so we won't get into too much detail here, but we can denote a few common cache access patterns from this.
 
 #### Common access patterns
 
@@ -37,17 +37,17 @@ This is not an exhaustive listing of all patterns, but rather a possible classif
 
 #### Scan resistance
 
-Given the common access patterns we've seen, there is a criterion called **scan resistance** which is the ability of a cache policy to handle scan patterns without discarding all actual common entries. This is important for mixed access patterns, where a sudden burst of streaming accesses (little to no locality of reference for a duration) can fill up a cache with one-hit entries while discarding the ones that were likely to be requested later. It is important to choose a cache eviction policy that is scan resistant when there is some scan/streaming access pattern going on. For instance, the LRU policy (which is the most commonly used policy in general because of how simple the implementation is) is not scan-resistant at all and can become inefficient as the streaming access pattern is prominent.
+Given the common access patterns we've seen, there is a criterion called **scan resistance** which is the ability of a cache policy to handle scan patterns without discarding all actual common entries. This is important for mixed access patterns, where a sudden burst of streaming accesses (little to no locality of reference for a duration) can fill up a cache with one-hit entries while discarding the ones that were likely to be requested later. It is important to choose a cache eviction policy that is scan-resistant when there is some scan/streaming access pattern going on. For instance, the LRU policy (which is the most commonly used policy in general because of how simple the implementation is) is not scan-resistant at all and can become inefficient as the streaming access pattern is prominent.
 
 ### Keys cardinality
 
-While looking for the best-suited caching policies is important to increase the caching efficiency, a complementary technique is to lower the requests cardinality.    
+While looking for the best-suited caching policies is important to increase the caching efficiency, a complementary technique is to lower the cardinality of the key fields.    
 
-Let's say we're implementing a caching mechanism for a search engine. Unless you're building the next google, it's likely that the order of the keywords is not important, thus, why would we consider "John Doe" to be a different request than "Doe John"? By considering the two queries the same we end up improving the caching efficiency by a lot. In this example, this could be achieved for instance with a simple sort over the list of keywords.    
+Let's say we're implementing a caching mechanism for a search engine. Unless you're building the next Google, it's likely that the order of the keywords is not important, thus, why would we consider "John Doe" to be a different request than "Doe John"? By considering the two queries the same we end up improving the caching efficiency by a lot. In this example, this could be achieved for instance with a simple sort over the list of keywords.    
 
 Here is a non-exhaustive list of ideas to reduce the cardinality of cache keys:
-- If keys are composed of several inputs (such as words in our example above), does the order matters? If not, then sort them so that keys with the same inputs are always presented the same way to the cache.
-- If keys or one of its inputs is a string, does the case matters? If not, transform them to lowercase every time to reduce cardinality. In the same spirit, you can trim whitespaces or EOL characters.
+- If keys are composed of several inputs (such as words in our example above), does the order matter? If not, then sort them so that keys with the same inputs are always presented the same way to the cache.
+- If keys or one of its inputs is a string, does the case matter? If not, transform them to lowercase every time to reduce cardinality. In the same spirit, you can trim whitespaces or EOL characters.
 - Avoid raw floating values. Floating values are known to be quite "volatile". Usually, rounding them to a precision that makes sense can prevent this issue.
 
 Depending on the criticality, it is sometimes worth monitoring this cardinality in some ways. That can be done in several ways. For instance, if the keys are made of several distinct inputs, the uniqueness of each input can be computed independently. Lowering the cardinality of the most volatile input may decrease the overall cardinality of the keys.    
@@ -64,7 +64,7 @@ Some commonly used eviction policies for limiting memory usage are LRU (Least Re
 
 ### Admission policy
 
-An admission policy can be used to prevent entries to be stored in the cache given some criteria. For instance, in some applications, you may know in advance that a given entry is unlikely to hit the cache more than once (for a search engine it could be a very long query). Then you may decide to never store such entries (and so no replacement policy would come into play). My advice is to use an admission policy whenever it can apply. If what occupies the most cache memory is the value (compared to keys), then an interesting trick is to still store the keys in the cache when the admission policy prevent the storage of the value. This would have a slight memory overhead because we would store more keys, however, it allows us to keep track of the usage of a given key, making it possible for the admission policy to predict more accurately whether a value is worth storing or not.
+An admission policy can be used to prevent entries from being stored in the cache given some criteria. For instance, in some applications, you may know in advance that a given entry is unlikely to hit the cache more than once (for a search engine it could be a very long query). Then you may decide to never store such entries (and so no replacement policy would come into play). My advice is to use an admission policy whenever it can apply. If what occupies the most cache memory is the value (compared to keys), then an interesting trick is to still store the keys in the cache when the admission policy prevents the storage of the value. This would have a slight memory overhead because we would store more keys, however, it allows us to keep track of the usage of a given key, making it possible for the admission policy to predict more accurately whether a value is worth storing or not.
 
 ### Which caching policy is the best?
 
@@ -73,7 +73,7 @@ In a future article in this caching series, we'll run benchmarks over a few comm
 
 ## Reducing memory usage
 
-We've seen how understanding the context to choose appropriate policies and bringing cardinality down is key to improving the likelihood of a cache to be efficient. However, we intentionally left an important and complementary factor to cache efficiency, which is memory usage. As soon as a cache is constrained to store a limited number of entries or bytes, we know that pushing this limit or optimizing memory usage will increase global efficiency in most scenarios. Adding RAM or storage is a solution but we'll focus on the less obvious solutions (yet more cost-effective and more interesting for the sake of this article).
+We've seen how understanding the context to choose appropriate policies and bringing cardinality down is key to improving the likelihood of a cache being efficient. However, we intentionally left an important and complementary factor to cache efficiency, which is memory usage. As soon as a cache is constrained to store a limited number of entries or bytes, we know that pushing this limit or optimizing memory usage will increase global efficiency in most scenarios. Adding RAM or storage is a solution but we'll focus on the less obvious solutions (yet more cost-effective and more interesting for the sake of this article).
 
 ### Keys as hashes
 
@@ -91,7 +91,7 @@ public interface Cache<Key, Hash, Value> {
     bool TryGetValue(Key key, Func<Key, Hash> hashFactory, Func<Key, Value> valueFactory, out Value value); 
 }
 ```
-This optimization can become quite powerful depending on the nature of the keys. Let's say we're caching search engine queries: on average, a key might be composed of 20 UTF-16 characters, representing 320 bits of data. Transforming this key to a 128-bit hash digest will divide by more than 2 the memory required for the keys part, thus making room for storing more entries and thus improving cache efficiency.   
+This optimization can become quite powerful depending on the nature of the keys. Let's say we're caching search engine queries: on average, a key might be composed of 20 UTF-16 characters, representing 320 bits of data. Transforming this key to a 128-bit hash digest will divide by more than 2 the memory required for the keys part, thus making room for storing more entries and improving cache efficiency.   
 Another benefit of such an approach is that keys of variable size are usually either individually stored on the heap or require an oversized buffer. With hashes of a fixed size, memory can be much more compact, which will reduce the CPU workload for several reasons.    
 At Equativ, we have implemented a structure called `Hash128` to generate hashes from keys of any kind. It turns out [Unity (the 3D engine) has also recently implemented a similar API](https://docs.unity.cn/2022.1/Documentation/ScriptReference/Hash128.html) (with the same name!). Part of their implementation can be found [here on Github](https://github.com/Unity-Technologies/UnityCsReference/blob/master/Runtime/Export/Hashing/Hash128.bindings.cs). It can serve as a nice basis to understand how they do it but I wouldn't recommend copying any of this for licensing reasons obviously but also because I find it flawed in some ways (mutable structs = ⚠️). If you are interested in our implementation, don't hesitate to ask us in the comments and we'll try to make a dedicated article on it, we think it can have many usages and is worth sharing 😄.
 
@@ -110,9 +110,13 @@ Here I decided to talk about memory fragmentation as part of a whole different s
 ### Arena-based linked list
 
 Most cache eviction policies (actually, all that I can think of) require the usage of one or more doubly linked lists to achieve true O(1) operations since such data structures allow O(1) removals and O(1) insertions while keeping order. Unfortunately, in Rust, Dotnet, Python, Java and probably many other languages, base libraries include a doubly linked list implementation where a node is an object individually allocated on the heap. This will inevitably imply a lot of allocations/deallocations and memory fragmentation.    
+
 ![Fragmented Heap](./heap-frag.png)    
-There is however a possible alternative, which we called arena-based linked lists. In short, as opposed to allocating nodes individually on the heap, we allocate one continuous buffer. The base principle came to us when we looked at how dotnet base `Dictionary<K, V>` class handles new entries with fields keeping track of free slots. For our linked list implementation, when the buffer is allocated, even if there is room for 1000 nodes but only 10 are actually used, we keep behind the scenes 990 "free" nodes linked together. Then, when a new entry is added to the list, we simply have to pick the first free entry at O(1) cost without having to allocate anything (unless the buffer is too small and needs to be resized). This is kind of having a linked list within our linked list for tracking free nodes. Thanks to this, we are now able to implement eviction policies with minimal allocations, less fragmentation, and better CPU affinity.    
+
+There is however a possible alternative, which we call arena-based linked lists. In short, as opposed to allocating nodes individually on the heap, we allocate one continuous buffer. The base principle came to us when we looked at how dotnet base `Dictionary<K, V>` class handles new entries with fields keeping track of free slots. For our linked list implementation, when the buffer is allocated, even if there is room for 1000 nodes but only 10 are actually used, we keep behind the scenes 990 "free" nodes linked together. Then, when a new entry is added to the list, we simply have to pick the first free entry at O(1) cost without having to allocate anything (unless the buffer is too small and needs to be resized). This is kind of having a linked list within our linked list for tracking free nodes. Thanks to this, we are now able to implement eviction policies with minimal allocations, less fragmentation, and better CPU affinity.    
+
 ![No Fragmentation](./heap-nofrag.png)    
+
 In case you are interested or just curious, [here is an open-sourced version of that linked list implementation](https://github.com/ogxd/optimized-linked-list).    
 You can see how the CPU times and allocations compare with the one from the Dotnet BCL:    
 ```
