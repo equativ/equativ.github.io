@@ -1,1 +1,3 @@
-Placeholder for tech articles written and published by Equativ.
+# Equativ tech blog
+
+[equativ.github.io](https://equativ.github.io/)

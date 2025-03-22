@@ -1,0 +1,85 @@
+baseURL: 'http://equativ.github.io'
+defaultContentLanguage: 'en'
+title: "Equativ's Tech Blog"
+theme: 'PaperMod'
+
+enableInlineShortcodes: true
+enableRobotsTXT: true
+enableEmoji: true
+
+buildDrafts: false
+buildFuture: true
+buildExpired: true
+
+menu:
+  main:
+    - identifier: Archives
+      name: Archives
+      url: /archives/
+      weight: 10
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 20
+    - identifier: search
+      name: Search
+      url: /search/
+      weight: 30
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+taxonomies:
+  tag: tags
+  category: categories
+
+params:
+  defaultTheme: dark
+  disableThemeToggle: true
+
+  ShowCodeCopyButtons: true
+  ShowBreadCrumbs: true
+  ShowToc: true
+  ShowReadingTime: true 
+  ShowPostNavLinks: true
+  hideFooter: true
+  comments: true
+  hidemeta: false
+  hideSummary: false
+  disableSpecial1stPost: false
+
+  label:
+    text: "Tech Blog"
+    icon: "equativ.png"
+    iconHeight: "40px"
+
+  homeInfoParams:
+    Title: "Equativ Tech Blog"
+    Content: ""
+
+  socialIcons:
+    - name: github
+      url: "https://github.com/equativ"
+    - name: linkedin
+      url: "https://www.linkedin.com/company/equativ/"
+    - name: Rss
+      url: "index.xml"
+
+  profileMode:
+    enabled: false # needs to be explicitly set
+
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content", "tags"]
+
+  mermaid:
+    theme: "dark"
+    align: "center"

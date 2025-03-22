@@ -1,0 +1,21 @@
+<div class="footer-author">
+
+{{- if not .Date.IsZero -}}
+<span title='date'>{{- .Date | time.Format (default "January 2, 2006" site.Params.DateFormat)}}</span>
+{{- end }}
+
+&nbsp;·&nbsp;
+
+{{- if (.Param "ShowReadingTime") -}}
+{{- printf "%d min read" .ReadingTime }}
+{{- end }}
+
+{{- if (.Param "ShowWordCount") -}}
+{{- .WordCount | default (printf "%d words" .WordCount) }}
+{{- end }}
+
+<div class="spacer"></div>
+
+{{- partial "author.html" . -}}
+
+</div>

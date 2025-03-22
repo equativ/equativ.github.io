@@ -1,0 +1,10 @@
+{{- if or .Params.author.name site.Params.author }}
+{{- if .Params.author.icon }}
+<img src="{{- .Params.author.icon | absURL }}" alt="Author icon" class="author-icon" />
+{{- end }}
+<div style="display: flex; flex-direction: column; position: relative;">
+    <p><b>{{- .Params.author.name }}</b></p>
+    <p>{{- .Params.author.title }}</p>
+    <a href="{{- .Params.author.link }}" class="entry-link" target="_blank"></a>
+</div>
+{{- end }}
