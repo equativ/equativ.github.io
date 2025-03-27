@@ -1,9 +1,8 @@
 .first-entry {
     padding: var(--gap);
-    background: var(--entry);
+    background: #00000088;
     border-radius: var(--radius);
     transition: transform 0.1s;
-    border: 1px solid var(--border);
 }
 
 .first-entry .entry-header {
@@ -43,10 +42,9 @@
     position: relative;
     max-width: calc(50% - 10px);
     padding: var(--gap);
-    background: var(--entry);
+    background: #00000088;
     border-radius: var(--radius);
     transition: transform 0.1s;
-    border: 1px solid var(--border);
 }
 
 /* Media query for screens smaller than 1024px */

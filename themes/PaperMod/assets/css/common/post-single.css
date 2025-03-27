@@ -190,6 +190,11 @@
     margin-bottom: 0;
 }
 
+code {
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    font-variant-ligatures: discretionary-ligatures;
+}
+
 .post-content code {
     margin: auto 4px;
     padding: 4px 6px;
@@ -204,7 +209,7 @@
     margin: auto 0;
     padding: 10px;
     color: rgb(213, 213, 214);
-    background: var(--hljs-bg) !important;
+    background: var(--code-bg) !important;
     border-radius: var(--radius);
     overflow-x: auto;
     word-break: break-all;
@@ -255,14 +260,9 @@
 
 .toc {
     margin: 0 2px 40px 2px;
-    border: 1px solid var(--border);
     background: var(--code-bg);
     border-radius: var(--radius);
     padding: 0.4em;
-}
-
-.dark .toc {
-    background: var(--entry);
 }
 
 .toc details summary {
@@ -307,7 +307,6 @@
 .paginav {
     border-radius: var(--radius);
     background: var(--code-bg);
-    border: 1px solid var(--border);
 }
 
 .post-tags a {
