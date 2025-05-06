@@ -1,6 +1,6 @@
 ---
 title: "Abstracting Cloud Providers and On Premise with Rancher"
-date: 2025-04-22T14:23:00+02:00
+date: 2025-05-07T14:23:00+02:00
 draft: false
 cover:
     image: "articles/rancher-setup/cover.png"
@@ -11,7 +11,7 @@ author:
     name: "Rajashree Gopalakrishnan"
     title: "Staff Devops Engineer"
     icon: "authors/rajashree.png"
-    link: "https://www.linkedin.com/in/rajashree_gopalakrishnan/"
+    link: "https://www.linkedin.com/in/rajashreegopalakrishnan/"
 summary: 
 tags: 
 - rancher
@@ -37,7 +37,7 @@ In this blog post, we will see technical details involved in setting up Rancher 
 ## Deploy Rancher in one of the Environments
 
 Rancher can be deployed in either of the environments. In our case we have deployed it in our GKE cluster using the helm. We are using argoCD to help us bootstrap the rancher cluster. 
-```
+```yml
   source:
     repoURL: https://releases.rancher.com/server-charts/stable
     chart: rancher
@@ -72,7 +72,7 @@ To use Rancher with AWS, we'll need to create an IAM user with necessary permiss
 
 1. Create user
 
-```
+```hcl
 resource "aws_iam_user" "delivery-rancher-admin-user" {
   name          = "rancher-user"
   path          = "/"
@@ -83,7 +83,7 @@ resource "aws_iam_user" "delivery-rancher-admin-user" {
 2. Assign the permissions mentioned in [this document](https://ranchermanager.docs.rancher.com/how-to-guides/new-user-guides/kubernetes-clusters-in-rancher-setup/set-up-clusters-from-hosted-kubernetes-providers/eks#minimum-eks-permissions) to the above user
 
 3. Create the Access Key for the user
-```
+```hcl
 resource "aws_iam_access_key" "delivery-rancher-admin-user-key" {
   user = aws_iam_user.delivery-rancher-admin-user.name
 }
@@ -91,7 +91,7 @@ resource "aws_iam_access_key" "delivery-rancher-admin-user-key" {
 
 4. Give the user access to Kubernetes API using AWS access entries. More information can be found [here](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html). And also, grant the user cluster admin role.
 
-```
+```hcl
 resource "aws_eks_access_entry" "rancher_access" {
   cluster_name  = "eks_cluster"
   principal_arn = aws_iam_user.delivery-rancher-admin-user.arn
@@ -111,14 +111,14 @@ resource "aws_eks_access_policy_association" "rancher_access" {
 ```
 
 5. Now that the user is set up, we can proceed further to import EKS cluster into Rancher. Configure terraform provider for rancher2
-```
+```hcl
 provider "rancher2" {
   api_url   = <rancher-host-url>
   token_key = <rancher-token-to-connect-to-rancher>
 }
 ```
 6. Create cloud credential for Rancher to be able to access AWS using the iam access key that we created in previous step.
-```
+```hcl
 resource "rancher2_cloud_credential" "aws-eks-prod" {
   name        = "eks_cluster_cloud_credential"
   description = "rancher Cloud credential for EKS cluster"
@@ -130,7 +130,7 @@ resource "rancher2_cloud_credential" "aws-eks-prod" {
 }
 ```
 7. Import already existing EKS cluster into Rancher
-```
+```hcl
 resource "rancher2_cluster" "cluster" {
   name        = "eks_cluster"
   description = "Terraform imported AWS cluster"
@@ -144,7 +144,7 @@ resource "rancher2_cluster" "cluster" {
 ```
 8. We can also enable RBAC, to ensure restricted access to the clusters. For example here we are allowing prtg sensors (for alerting) to have access over the clusters.
 
-```
+```hcl
 resource "rancher2_cluster_role_template_binding" "prtg-sensors" {
   name             = "prtg-sensors"
   cluster_id       = var.rancher_cluster_id
@@ -159,7 +159,7 @@ You need to create a Service Account in GCP with the necessary permissions to ma
 Once the service account is generated, store its credentials securely in a vault.
 
 These credentials can then be used to establish a connection between Rancher and the GKE cluster, enabling Rancher to manage and monitor GKE clusters just as effortlessly as EKS clusters.
-```
+```hcl
 resource "rancher2_cloud_credential" "gcp" {
   name        = "gcp"
   description = "Cloud credential for cluster"

@@ -1,6 +1,6 @@
 ---
 title: "Multi-cloud deployment with Rancher and ArgoCD"
-date: 2025-04-22T14:23:00+02:00
+date: 2025-05-07T14:23:00+02:00
 draft: false
 cover:
     image: "articles/argocd/cover.png"
@@ -11,7 +11,7 @@ author:
     name: "Rajashree Gopalakrishnan"
     title: "Staff Devops Engineer"
     icon: "authors/rajashree.png"
-    link: "https://www.linkedin.com/in/rajashree_gopalakrishnan/"
+    link: "https://www.linkedin.com/in/rajashreegopalakrishnan/"
 summary: 
 tags: 
 - rancher
@@ -42,7 +42,7 @@ By integrating Rancher with ArgoCD, you achieve:
 ## Deploy ArgoCD
 
 To deploy ArgoCD in your environment, use the helm chart and configure necessary values.
-```
+```sh
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd --namespace argocd
 ```
@@ -51,7 +51,7 @@ helm install argocd argo/argo-cd --namespace argocd
 
 To connect Rancher and ArgoCD , the clusters in Rancher needs to be configured in ArgoCD along with the bearer token to access the cluster.
 Generate token to access the rancher cluster using terraform. Cluster details needs to be passed as variables.
-```
+```hcl
 resource "rancher2_token" "token" {
   description = "ArgoCD cluster token"
   cluster_id  = var.cluster_id
@@ -69,7 +69,7 @@ resource "vault_generic_secret" "cluster" {
 }
 ```
 2. Configure ExternalSecrets for all the clusters by fetching the secrets from vault, generated in previous step. This will be used by ArgoCD to access all the k8s clusters in rancher.
-```
+```yml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -115,7 +115,7 @@ Basic structure of the files in any of the ArgoCD project is as below. This may 
 
 Below is the example of one of the ApplicationSet and its parameters.
 
-```
+```yml
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
