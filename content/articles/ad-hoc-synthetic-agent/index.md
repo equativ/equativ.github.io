@@ -1,6 +1,6 @@
 ---
 title: "Eliminating observability blind spots with a synthetic monitoring agent"
-date: 2025-12-1T11:30:08+02:00
+date: 2025-12-01T11:30:08+02:00
 draft: false
 mermaid: true
 katex: true
