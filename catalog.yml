@@ -1,0 +1,4 @@
+apiVersion: catalog.backend.equativ/v1
+kind: Project
+spec:
+  owner: cb-team
